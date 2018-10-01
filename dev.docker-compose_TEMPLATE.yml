@@ -22,6 +22,7 @@ services:
       - MARABUNTA_MODE=demo
       - VIRTUAL_HOST=docky-11-oca-instance.dy
       - VIRTUAL_PORT=8069
+      - ADDONS_PATH=src/addons,src/odoo/addons,links,local-src
       - GITHUB_LOGIN=XXXX
       - GITHUB_PASSWORD=XXXX
     links:

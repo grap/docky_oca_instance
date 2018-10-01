@@ -2,15 +2,17 @@
 addons_path = {{ .Env.ADDONS_PATH }}
 data_dir = /data/odoo
 auto_reload = False
+
+dbfilter = .*
+admin_passwd = admin
+
 db_host = {{ .Env.DB_HOST }}
 db_name = {{ .Env.DB_NAME }}
 db_user = {{ .Env.DB_USER }}
 db_password = {{ .Env.DB_PASSWORD }}
 db_sslmode = {{ default .Env.DB_SSLMODE "prefer" }}
-dbfilter = ^{{ default .Env.DB_NAME "odoodb" }}$
-list_db = {{ default .Env.LIST_DB "False" }}
-admin_passwd = {{ default .Env.ADMIN_PASSWD "" }}
 db_maxconn = {{ default .Env.DB_MAXCONN "64" }}
+
 limit_memory_soft = {{ default .Env.LIMIT_MEMORY_SOFT "2147483648" }}
 limit_memory_hard = {{ default .Env.LIMIT_MEMORY_HARD "2684354560" }}
 limit_request = {{ default .Env.LIMIT_REQUEST "8192" }}
@@ -49,4 +51,7 @@ proxy_mode = True
 ; smtp_ssl = False
 ; smtp_user = False
 unaccent = {{ default .Env.UNACCENT "False" }}
-ma_cle = bob
+
+github_login = {{ .Env.GITHUB_LOGIN }}
+github_password = {{ .Env.GITHUB_PASSWORD }}
+source_code_local_path = /oca_code_source/

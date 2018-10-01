@@ -6,6 +6,10 @@ server-tools:
     modules: [sql_request_abstract]
     src: https://github.com/OCA/server-tools 11.0
 
+interface-github:
+    modules: [github_connector, github_connector_odoo]
+    src: https://github.com/OCA/interface-github 11.0
+
 #product_attribute:
 #    remotes:
 #        oca: https://github.com/OCA/product-attribute.git
