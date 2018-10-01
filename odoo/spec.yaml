@@ -1,0 +1,17 @@
+odoo:
+    modules: []
+    src: https://github.com/OCA/ocb 11.0
+
+server-tools:
+    modules: [sql_request_abstract]
+    src: https://github.com/OCA/server-tools 11.0
+
+#product_attribute:
+#    remotes:
+#        oca: https://github.com/OCA/product-attribute.git
+#        acsone: git+ssh://git@github.com/acsone/product-attribute.git
+#    merges:
+#        - oca 8.0
+#        - oca refs/pull/105/head
+#        - oca refs/pull/106/head
+#    target: acsone aggregated_branch_name
