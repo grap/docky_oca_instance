@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2018-Today: Odoo Community Association (OCA)
+@author: Sylvain LE GAL (https://twitter.com/legalsylvain)
+License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+-->
+<odoo>
+
+    <record id="demo_migration_analysis_line" model="migration.analysis.line">
+        <field name="analysis_id" ref="demo_migration_analysis" />
+        <field name="name">point_of_sale</field>
+    </record>
+
+</odoo>
