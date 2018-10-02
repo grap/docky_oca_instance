@@ -9,7 +9,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
     <record id="demo_migration_analysis" model="migration.analysis">
         <field name="name">Demo Migration Analysis</field>
         <field name="initial_serie_id" ref="github_connector.oca_serie_80" />
-        <field name="final_serie_id" ref="github_connector.oca_serie_11" />
+        <field name="final_serie_id" ref="github_connector.oca_serie_110" />
     </record>
 
 </odoo>

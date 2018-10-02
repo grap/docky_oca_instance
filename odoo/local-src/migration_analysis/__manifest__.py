@@ -13,9 +13,13 @@
         'github_connector_odoo',
     ],
     'data': [
-        'views/migration_analysis.xml',
+        'views/menu.xml',
+        'views/view_odoo_migration.xml',
+        'views/view_odoo_module_core_version.xml',
+        'views/view_migration_analysis.xml',
     ],
     'demo': [
+        'demo/odoo_migration.xml',
         'demo/migration_analysis.xml',
         'demo/migration_analysis_line.xml',
     ],

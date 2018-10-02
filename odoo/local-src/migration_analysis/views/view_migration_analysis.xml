@@ -63,12 +63,6 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
         <field name="view_mode">tree,form</field>
     </record>
 
-
-    <menuitem id="menu_main_migration_analysis"
-        parent="github_connector.menu_github"
-        sequence="15"
-        name="Migrations"/>
-
     <menuitem id="menu_migration_analysis"
         parent="menu_main_migration_analysis"
         sequence="1"

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2018-Today: Odoo Community Association (OCA)
+@author: Sylvain LE GAL (https://twitter.com/legalsylvain)
+License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+-->
+<odoo>
+
+
+    <record id="view_odoo_migration_search" model="ir.ui.view">
+        <field name="model">odoo.migration</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="initial_serie_id"/>
+                <field name="final_serie_id"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_odoo_migration_tree" model="ir.ui.view">
+        <field name="model">odoo.migration</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="initial_serie_id"/>
+                <field name="final_serie_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_odoo_migration_form" model="ir.ui.view">
+        <field name="model">odoo.migration</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="button_analyse_coverage" type="object" string="Analyse Coverage" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box" />
+                    <group>
+                        <field name="initial_serie_id"/>
+                        <field name="final_serie_id"/>
+                        <field name="odoo_coverage_url"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_odoo_migration" model="ir.actions.act_window">
+        <field name="name">Odoo Migration</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">odoo.migration</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_odoo_migration"
+        parent="menu_main_migration_analysis"
+        sequence="3"
+        action="action_odoo_migration"/>
+
+</odoo>
