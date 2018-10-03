@@ -8,8 +8,17 @@ from odoo import api, fields, models
 class MigrationAnalysisLineSerie(models.Model):
     _name = 'migration.analysis.line.serie'
 
+    _STATE_SELECTION = [
+        ('unknown', 'Unknown'),
+        ('initial', 'Initial'),
+    ]
+
     analysis_line_id = fields.Many2one(
         comodel_name='migration.analysis.line', required=True,
         ondelete='cascade')
 
     serie_id = fields.Many2one(comodel_name='github.serie')
+
+    state = fields.Selection(
+        string='State', selection=_STATE_SELECTION, default='unknown',
+        required=True)

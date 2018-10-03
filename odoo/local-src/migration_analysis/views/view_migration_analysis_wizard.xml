@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2018-Today: Odoo Community Association (OCA)
+@author: Sylvain LE GAL (https://twitter.com/legalsylvain)
+License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+-->
+<odoo>
+
+    <record id="view_github_migration_analysis_wizard_form" model="ir.ui.view">
+        <field name="model">migration.analysis.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="button_update_module_list" type="object" string="Update Module List"/>
+                </header>
+                <sheet>
+                    <group col="4">
+                        <field name="migration_analysis_id"/>
+                    </group>
+                    <group col="4">
+                        <field name="module_list" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <act_window id="action_migration_analysis_wizard"
+        name="Download and Analyze Source Code"
+        src_model="migration.analysis"
+        res_model="migration.analysis.wizard"
+        view_type="form"
+        view_mode="form"
+        context="{'default_migration_analysis_id': active_id}"
+        target="new"/>
+
+</odoo>

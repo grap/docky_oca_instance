@@ -12,7 +12,7 @@ class OdooModuleCoreVersion(models.Model):
         ('ok', 'OK'),
         ('wip', 'Work In Progress'),
         ('to_migrate', 'To Migrate'),
-        
+        ('obsolete', 'Obsolete'),
     ]
 
     serie_id = fields.Many2one(

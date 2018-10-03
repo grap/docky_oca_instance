@@ -44,9 +44,16 @@ class MigrationAnalysis(models.Model):
     def _do_analysis(self):
         self.ensure_one()
         AnalysisLineSerie = self.env['migration.analysis.line.serie']
+        previous_serie = False
         for serie in self.serie_ids:
             for line in self.line_ids:
+                state = 'unknown'
+                # TODO Make analysis
+                if not previous_serie:
+                    state = 'initial'
                 new_line_serie = AnalysisLineSerie.create({
+                    'state': state,
                     'analysis_line_id': line.id,
                     'serie_id': serie.id,
                 })
+            previous_serie = serie

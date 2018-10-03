@@ -25,6 +25,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                     <button name="button_analyse" type="object" string="Analyse"
                             class="btn btn-default" icon="fa-chevron-right"
                             groups="github_connector.group_github_connector_manager"/>
+                    <button type="action" name="%(action_migration_analysis_wizard)d" string="Set Module List"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
