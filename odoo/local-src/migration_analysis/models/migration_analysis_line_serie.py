@@ -11,6 +11,15 @@ class MigrationAnalysisLineSerie(models.Model):
     _STATE_SELECTION = [
         ('unknown', 'Unknown'),
         ('initial', 'Initial'),
+        ('ok', 'OK'),
+        ('to_migrate', 'To Migrate'),
+        ('obsolete', 'Obsolete'),
+    ]
+
+    _TYPE_SELECTION = [
+        ('odoo', 'Odoo'),
+        ('OCA', 'OCA'),
+        ('custom', 'Custom'),
     ]
 
     analysis_line_id = fields.Many2one(
@@ -21,4 +30,8 @@ class MigrationAnalysisLineSerie(models.Model):
 
     state = fields.Selection(
         string='State', selection=_STATE_SELECTION, default='unknown',
+        required=True)
+
+    type = fields.Selection(
+        string='Type', selection=_TYPE_SELECTION, default='custom',
         required=True)

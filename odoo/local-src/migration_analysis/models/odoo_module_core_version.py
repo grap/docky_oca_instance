@@ -15,6 +15,9 @@ class OdooModuleCoreVersion(models.Model):
         ('obsolete', 'Obsolete'),
     ]
 
+    module_name = fields.Char(
+        string='Module Name', related='module_id.name', store=True)
+
     serie_id = fields.Many2one(
         string='Serie', comodel_name='github.serie', required=True)
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <report
+        id="action_report_migration_analysis"
+        string="Report"
+        model="migration.analysis"
+        report_type="qweb-pdf"
+        file="migration_analysis.report_migration_analysis"
+        name="migration_analysis.report_migration_analysis"
+        print_report_name="object.name.replace(' ', '_')"/>
+
+</odoo>

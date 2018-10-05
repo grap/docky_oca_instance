@@ -19,6 +19,8 @@
         'views/view_migration_analysis_wizard.xml',
         'views/view_migration_analysis.xml',
         'views/view_migration_analysis_line.xml',
+        'report/migration_analysis_report.xml',
+        'report/migration_analysis_report_template.xml',
     ],
     'demo': [
         'demo/odoo_migration.xml',

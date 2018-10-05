@@ -11,6 +11,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
+                <field name="user_id"/>
                 <field name="initial_serie_id"/>
                 <field name="final_serie_id"/>
             </tree>
@@ -36,6 +37,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                     <group col="4">
                         <field name="initial_serie_id"/>
                         <field name="final_serie_id"/>
+                        <field name="user_id"/>
                         <field name="serie_ids" widget="many2many_tags"/>
                     </group>
                     <notebook>
@@ -44,7 +46,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                                 <field name="line_ids" nolabel="1" editable="bottom">
                                     <tree>
                                         <field name="name"/>
-                                        <field name="line_serie_ids"/>
+                                        <field name="description"/>
                                     </tree>
                                 </field>
                             </group>
