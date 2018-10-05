@@ -1,75 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<template id="report_migration_analysis_document">
-    <t t-call="web.external_layout">
-        <t t-set="doc" t-value="doc.with_context({'lang':doc.user_id.partner_id.lang})" />
-        <div class="page">
-            <div class="oe_structure"/>
+    <template id="report_migration_analysis_document">
+        <t t-call="web.external_layout">
+            <t t-set="doc" t-value="doc.with_context({'lang':doc.user_id.partner_id.lang})" />
+            <div class="page">
+                <div class="oe_structure"/>
 
-            <h2>
-                <span t-field="doc.name"/>
-            </h2>
+                <h2>
+                    <span t-field="doc.name"/>
+                </h2>
 
-            <div class="row mt32 mb32" id="informations">
-                <div class="col-xs-3">
-                    <strong>User :</strong>
-                    <p t-field="doc.user_id.name"/>
+                <div class="row mt32 mb32" id="informations">
+                    <div class="col-xs-3">
+                        <strong>User :</strong>
+                        <p t-field="doc.user_id.name"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Initial Serie :</strong>
+                        <p t-field="doc.initial_serie_id.name"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Final Serie :</strong>
+                        <p t-field="doc.final_serie_id.name"/>
+                    </div>
                 </div>
-                <div class="col-xs-3">
-                    <strong>Initial Serie :</strong>
-                    <p t-field="doc.initial_serie_id.name"/>
-                </div>
-                <div class="col-xs-3">
-                    <strong>Final Serie :</strong>
-                    <p t-field="doc.final_serie_id.name"/>
-                </div>
-            </div>
 
 
-            <table class="table table-condensed" style="width:100%">
-                <thead>
-                    <tr>
-                        <th>Module Name</th>
-                        <t t-foreach="doc.serie_ids" t-as="serie">
-                            <th>
-                                <span t-field="serie.name"/>
-                            </th>
-                        </t>
-                    </tr>
-               </thead>
-
-               <tbody class="sale_tbody">
-                    <t t-foreach="doc.line_ids" t-as="line">
+                <table class="table table-condensed" style="width:100%">
+                    <thead>
                         <tr>
-                            <th>
-                                <span t-field="line.name"/>
-                            </th>
-                            <t t-foreach="line.line_serie_ids" t-as="line_serie">
-                                <td t-att-style="('background-color:' + '#FAF') + ';'">
-                                    <span t-field="line_serie.state"/>
-                                    <br />
-                                    <span style="color:gray;">
-                                        (<span t-field="line_serie.type"/>)
-                                    </span>
-                                </td>
+                            <th>Module Name</th>
+                            <t t-foreach="doc.serie_ids" t-as="serie">
+                                <th>
+                                    <span t-field="serie.name"/>
+                                </th>
                             </t>
                         </tr>
-                    </t>
-                </tbody>
-            </table>
+                   </thead>
 
-            <div class="oe_structure"/>
-        </div>
-    </t>
-</template>
+                   <tbody class="sale_tbody">
+                        <t t-foreach="doc.line_ids" t-as="line">
+                            <tr>
+                                <th>
+                                    <span t-field="line.name"/>
+                                </th>
+                                <t t-foreach="line.line_serie_ids" t-as="line_serie">
+                                    <td t-att-style="('background-color:' + '#FAF') + ';'">
+                                        <span t-field="line_serie.state"/>
+                                        <br />
+                                        <span style="color:gray;">
+                                            (<span t-field="line_serie.type"/>)
+                                        </span>
+                                    </td>
+                                </t>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
 
-
-<template id="report_migration_analysis">
-    <t t-call="web.html_container">
-        <t t-foreach="docs" t-as="doc">
-            <t t-call="migration_analysis.report_migration_analysis_document" t-lang="doc.user_id.partner_id.lang"/>
+                <div class="oe_structure"/>
+            </div>
         </t>
-    </t>
-</template>
+    </template>
+
+
+    <template id="report_migration_analysis">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="migration_analysis.report_migration_analysis_document" t-lang="doc.user_id.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
 
 </odoo>
