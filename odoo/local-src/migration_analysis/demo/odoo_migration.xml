@@ -6,12 +6,6 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 -->
 <odoo>
 
-    <record id="migration_61_70" model="odoo.migration">
-        <field name="initial_serie_id" ref="github_connector.oca_serie_61" />
-        <field name="final_serie_id" ref="github_connector.oca_serie_70" />
-        <field name="odoo_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/7.0/openerp/openupgrade/doc/source/modules61-70.rst</field>
-    </record>
-
     <record id="migration_70_80" model="odoo.migration">
         <field name="initial_serie_id" ref="github_connector.oca_serie_70" />
         <field name="final_serie_id" ref="github_connector.oca_serie_80" />

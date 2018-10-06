@@ -10,7 +10,7 @@
     'author':
         'Odoo Community Association (OCA), GRAP',
     'depends': [
-        'github_connector_odoo',
+        'github_connector_oca',
     ],
     'data': [
         'views/menu.xml',

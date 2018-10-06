@@ -25,11 +25,11 @@ class OdooMigration(models.Model):
     ]
 
     _mapping_analysis = {
-        'Done': 'ok',
-        'No change': 'ok',
-        'Nothing to do': 'ok',
-        'work in progress': 'wip',
-        'Moved to OCA': 'ok',
+        'Done': 'ok_migration',
+        'No change': 'ok_migration',
+        'Nothing to do': 'ok_migration',
+        'work in progress': 'wip_migration',
+        'Moved to OCA': 'ok_migration',
     }
 
     initial_serie_id = fields.Many2one(
@@ -44,30 +44,105 @@ class OdooMigration(models.Model):
         string='URL of the Coverage file',
         help="Usually set in the OpenUpgrade Project")
 
+    line_ids = fields.One2many(
+        string='Migration Lines', comodel_name='odoo.migration.line',
+        inverse_name='migration_id')
+
     def button_analyse_coverage(self):
         OdooModule = self.env['odoo.module']
+        OodooModuleVersion = self.env['odoo.module.version']
+        OdooMigrationLine = self.env['odoo.migration.line']
         for migration in self:
+            migration.line_ids.unlink()
             data_list = self._parse_openupgrade_file()
             for item in data_list:
-                new_module = False
-                obsolete_version = False
+###                new_module = False
+###                obsolete_version = False
+                migration_state = 'todo_migration'
                 if '|new|' in item:
-                    new_version = True
                     item = item.replace('|new|', '')
                 if '|del|' in item:
-                    obsolete_version = True
                     item = item.replace('|del|', '')
                 module_data = item.replace("\n", "").split("|")
                 module_data = [
                     x.strip() for x in module_data if x not in ['', ', ']]
                 if len(module_data) >= 2:
+                    # Parse Data
                     module_name = module_data[0]
-                    module_state = 'to_migrate'
-                    module_state_text = module_data[1]
-                    odoo_module = OdooModule.create_if_not_exist(module_name)
-                    for k, v in self._mapping_analysis.items():
-                        if k in module_state_text:
-                            module_state = v
+                    # TODO, analyse if module has been renamed.
+                    new_module_name = module_name
+                    initial_versions = OodooModuleVersion.search([
+                        ('technical_name', '=', module_name),
+                        ('serie_id', '=', migration.initial_serie_id.id),
+                    ])
+
+                    # Try to get initial and final module versions
+                    if len(initial_versions) > 1:
+                        exceptions.Warning(_(
+                            "Many Module Version found for the module %s"
+                            ", version %s" % (
+                                module_name, migration.initial_serie_id.name)))
+                    final_versions = OodooModuleVersion.search([
+                        ('technical_name', '=', new_module_name),
+                        ('serie_id', '=', migration.final_serie_id.id),
+                    ])
+                    if len(final_versions) > 1:
+                        exceptions.Warning(_(
+                            "Many Module Version found for the module %s"
+                            ", version %s" % (
+                                new_module_name,
+                                migration.initial_serie_id.name)))
+
+                    if initial_versions:
+                        initial_version_id = initial_versions[0].id
+                        initial_owner_type = initial_versions[0].owner_type
+                    else:
+                        initial_version_id = False
+                        initial_owner_type = 'undefined'
+
+                    if final_versions:
+                        final_version_id = final_versions[0].id
+                        final_owner_type = final_versions[0].owner_type
+                    else:
+                        final_version_id = False
+                        final_owner_type = 'undefined'
+
+                    # Analyse state (1/2 : Simple Cases)
+                    if not initial_versions:
+                        # New module --> Always OK
+                        migration_state = 'ok_new_module'
+                    elif not final_versions:
+                        # Removed module --> We assume it's always OK,
+                        # because we don't have any way to know it
+                        migration_state = 'ok_removed_module'
+                    else:
+                        if final_owner_type != 'editor':
+                            migration_state = 'ok_moved_module'
+
+                    # Analyse state (2/2 : Parsing document)
+                    if migration_state == 'todo_migration':
+                        migration_state_text = module_data[1]
+                        for k, v in self._mapping_analysis.items():
+                            if k in migration_state_text:
+                                migration_state = v
+
+                    # Creation migration lines
+                    OdooMigrationLine.create({
+                        'migration_id': migration.id,
+                        'state': migration_state,
+                        'module_name': module_name,
+                        'initial_module_version_id': initial_version_id,
+                        'initial_owner_type': initial_owner_type,
+                        'final_module_version_id': final_version_id,
+                        'final_owner_type': final_owner_type,
+                    })
+
+#                    module_state = 'to_migrate'
+#                    module_state_text = module_data[1]
+#                    odoo_module = OdooModule.create_if_not_exist(module_name)
+#                    for k, v in self._mapping_analysis.items():
+#                        if k in module_state_text:
+#                            module_state = v
 ###                    if not new_module:
 ###                        previous_version =\
 ###                            OdooModuleCoreVersion.create_if_not_exist(

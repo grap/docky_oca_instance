@@ -5,3 +5,4 @@ from . import migration_analysis_line_serie
 from . import migration_analysis_wizard
 
 from . import odoo_migration
+from . import odoo_migration_line

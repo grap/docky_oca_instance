@@ -41,6 +41,23 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                         <field name="final_serie_id"/>
                         <field name="odoo_coverage_url"/>
                     </group>
+                    <notebook>
+                        <page name="migration_lines" string="Lines">
+                            <group cols="4">
+                                <field name="line_ids" nolabel="1">
+                                    <tree>
+                                        <field name="module_name"/>
+                                        <field name="state" options='{"bg_color": "green: state in [ok_migration, ok_new_module, ok_migration, ok_removed_module, ok_moved_module]; red: state == todo_migration"}' />
+                                        <field name="initial_owner_type" attrs="{'invisible': [('state', '=', 'ok_new_module')]}"/>
+                                        <field name="initial_module_version_id"/>
+                                        <field name="final_owner_type" attrs="{'invisible': [('state', '=', 'ok_removed_module')]}"/>
+                                        <field name="final_module_version_id"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    </notebook>
+
                 </sheet>
             </form>
         </field>
