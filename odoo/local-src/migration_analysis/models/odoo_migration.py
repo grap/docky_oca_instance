@@ -56,8 +56,6 @@ class OdooMigration(models.Model):
             migration.line_ids.unlink()
             data_list = self._parse_openupgrade_file()
             for item in data_list:
-###                new_module = False
-###                obsolete_version = False
                 migration_state = 'todo_migration'
                 if '|new|' in item:
                     item = item.replace('|new|', '')
