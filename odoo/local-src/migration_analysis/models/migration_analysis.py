@@ -56,44 +56,43 @@ class MigrationAnalysis(models.Model):
         self.ensure_one()
         OdooModuleVersion = self.env['odoo.module.version']
         AnalysisLineSerie = self.env['migration.analysis.line.serie']
-        OdooModuleCoreVersion = self.env['odoo.module.core.version']
         previous_serie = False
         for serie in self.serie_ids:
             for line in self.line_ids:
                 state = 'unknown'
                 type = 'custom'
 
-                # Identify module position (type)
-                module_core_version = OdooModuleCoreVersion.search([
-                    ('serie_id', '=', serie.id),
-                    ('module_name', '=', line.name),
-                ])
-                if module_core_version:
-                    type = 'odoo'
-                else:
-                    pass
-#                    oca_module_version = OdooModuleVersion.search([
-#                    ])
+###                # Identify module position (type)
+###                module_core_version = OdooModuleCoreVersion.search([
+###                    ('serie_id', '=', serie.id),
+###                    ('module_name', '=', line.name),
+###                ])
+###                if module_core_version:
+###                    type = 'odoo'
+###                else:
+###                    pass
+####                    oca_module_version = OdooModuleVersion.search([
+####                    ])
 
-                # Identify workload (state)
-                if not previous_serie:
-                    # First Version
-                    state = 'initial'
+###                # Identify workload (state)
+###                if not previous_serie:
+###                    # First Version
+###                    state = 'initial'
 
-                else:
-                    # Upgrade Version
-                    # Try to get previous module serie
-                    previous_module_core_version =\
-                        OdooModuleCoreVersion.search([
-                            ('serie_id', '=', previous_serie.id),
-                            ('module_name', '=', line.name),
-                        ])
-                    if previous_module_core_version:
-                        state =\
-                            previous_module_core_version.next_version_state
-                        if not state:
-                            # TODO, understand weird case
-                            state = 'unknown'
+###                else:
+###                    # Upgrade Version
+###                    # Try to get previous module serie
+###                    previous_module_core_version =\
+###                        OdooModuleCoreVersion.search([
+###                            ('serie_id', '=', previous_serie.id),
+###                            ('module_name', '=', line.name),
+###                        ])
+###                    if previous_module_core_version:
+###                        state =\
+###                            previous_module_core_version.next_version_state
+###                        if not state:
+###                            # TODO, understand weird case
+###                            state = 'unknown'
                 new_line_serie = AnalysisLineSerie.create({
                     'type': type,
                     'state': state,

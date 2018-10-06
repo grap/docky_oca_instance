@@ -46,7 +46,6 @@ class OdooMigration(models.Model):
 
     def button_analyse_coverage(self):
         OdooModule = self.env['odoo.module']
-        OdooModuleCoreVersion = self.env['odoo.module.core.version']
         for migration in self:
             data_list = self._parse_openupgrade_file()
             for item in data_list:
@@ -69,22 +68,21 @@ class OdooMigration(models.Model):
                     for k, v in self._mapping_analysis.items():
                         if k in module_state_text:
                             module_state = v
-                    print("%s - %s - %s" % (module_name, module_state_text, module_state))
-                    if not new_module:
-                        previous_version =\
-                            OdooModuleCoreVersion.create_if_not_exist(
-                                odoo_module, migration.initial_serie_id)
-                        previous_version.next_version_state = module_state
-                    if not obsolete_version:
-                        new_version =\
-                            OdooModuleCoreVersion.create_if_not_exist(
-                                odoo_module, migration.final_serie_id)
-                    else:
-                        # TODO FIXME, doesn't work
-                        previous_version =\
-                            OdooModuleCoreVersion.create_if_not_exist(
-                                odoo_module, migration.initial_serie_id)
-                        previous_version.write({'next_version_state': 'obsolete'})
+###                    if not new_module:
+###                        previous_version =\
+###                            OdooModuleCoreVersion.create_if_not_exist(
+###                                odoo_module, migration.initial_serie_id)
+###                        previous_version.next_version_state = module_state
+###                    if not obsolete_version:
+###                        new_version =\
+###                            OdooModuleCoreVersion.create_if_not_exist(
+###                                odoo_module, migration.final_serie_id)
+###                    else:
+###                        # TODO FIXME, doesn't work
+###                        previous_version =\
+###                            OdooModuleCoreVersion.create_if_not_exist(
+###                                odoo_module, migration.initial_serie_id)
+###                        previous_version.write({'next_version_state': 'obsolete'})
 
     def _parse_openupgrade_file(self):
         self.ensure_one()

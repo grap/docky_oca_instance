@@ -15,7 +15,6 @@
     'data': [
         'views/menu.xml',
         'views/view_odoo_migration.xml',
-        'views/view_odoo_module_core_version.xml',
         'views/view_migration_analysis_wizard.xml',
         'views/view_migration_analysis.xml',
         'views/view_migration_analysis_line.xml',
