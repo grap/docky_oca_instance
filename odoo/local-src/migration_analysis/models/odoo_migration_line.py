@@ -8,20 +8,17 @@ from odoo import api, fields, models
 from odoo.addons.github_connector_oca.models.github_organization\
     import _OWNER_TYPE_SELECTION
 
+_STATE_SELECTION = [
+    ('ok_migration',        'OK (Migration Done)'),
+    ('ok_new_module',       'OK (New Module)'),
+    ('ok_removed_module',   'OK (Removed Module)'),
+    ('ok_moved_module',     'OK (Moved Module)'),
+    ('wip_migration',       'WIP (Migration)'),
+    ('todo_migration',      'TODO (Migration)'),
+]
+
 class OdooMigrationLine(models.Model):
     _name = 'odoo.migration.line'
-
-    # TODO : 
-    # - Add 'renamed' state. but it is quite hard to analyse.
-    # - Add 'renamed_module_name in that case
-    _STATE_SELECTION = [
-        ('ok_migration', 'OK (Migration Done)'),
-        ('ok_new_module', 'OK (New Module'),
-        ('ok_removed_module', 'OK (Removed Module'),
-        ('ok_moved_module', 'OK (Moved Module'),
-        ('wip_migration', 'WIP Migration'),
-        ('todo_migration', ' TODO Migration'),
-    ]
 
     migration_id = fields.Many2one(
         string='Odoo Migration', comodel_name='odoo.migration', required=True,

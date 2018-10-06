@@ -55,48 +55,61 @@ class MigrationAnalysis(models.Model):
     def _do_analysis(self):
         self.ensure_one()
         OdooModuleVersion = self.env['odoo.module.version']
+        MigrationLine = self.env['odoo.migration.line']
         AnalysisLineSerie = self.env['migration.analysis.line.serie']
         previous_serie = False
         for serie in self.serie_ids:
+            previous_line_serie = False
             for line in self.line_ids:
                 state = 'unknown'
-                type = 'custom'
 
-###                # Identify module position (type)
-###                module_core_version = OdooModuleCoreVersion.search([
-###                    ('serie_id', '=', serie.id),
-###                    ('module_name', '=', line.name),
-###                ])
-###                if module_core_version:
-###                    type = 'odoo'
-###                else:
-###                    pass
-####                    oca_module_version = OdooModuleVersion.search([
-####                    ])
+                # Find the OpenUpgrade migration result (if any)
+                migration_line = MigrationLine.search([
+                    ('module_name', '=', line.name),
+                    ('initial_serie_id', '=', serie.id),
+                ])
 
-###                # Identify workload (state)
-###                if not previous_serie:
-###                    # First Version
-###                    state = 'initial'
+                # Find Odoo Module Version (if found)
+                if previous_serie:
+                    previous_module_version = OdooModuleVersion.search([
+                        ('technical_name', '=', line.name),
+                        ('serie_id', '=', previous_serie.id),
+                    ])
+                current_module_version = OdooModuleVersion.search([
+                    ('technical_name', '=', line.name),
+                    ('serie_id', '=', serie.id),
+                ])
 
-###                else:
-###                    # Upgrade Version
-###                    # Try to get previous module serie
-###                    previous_module_core_version =\
-###                        OdooModuleCoreVersion.search([
-###                            ('serie_id', '=', previous_serie.id),
-###                            ('module_name', '=', line.name),
-###                        ])
-###                    if previous_module_core_version:
-###                        state =\
-###                            previous_module_core_version.next_version_state
-###                        if not state:
-###                            # TODO, understand weird case
-###                            state = 'unknown'
+                # Define owner type
+                if current_module_version:
+                    owner_type = current_module_version.owner_type
+                else:
+                    owner_type = 'undefined'
+
+                # Identify workload (state)
+                if not previous_serie:
+                    # First Version
+                    state = 'initial'
+                elif migration_line:
+                    state = migration_line.state
+                elif previous_module_version:
+                    if current_module_version and previous_module_version.owner_type != 'editor':
+                        state = 'ok_ported'
+                    elif previous_line_serie.state == 'ok_removed_module':
+                        state = 'ok_removed_module'
+                    else:
+                        state = 'todo_port'
+                else:
+                    if current_module_version:
+                        state = 'ok_ported'
+                    else:
+                        state = 'unknown'
+
                 new_line_serie = AnalysisLineSerie.create({
-                    'type': type,
+                    'owner_type': owner_type,
                     'state': state,
                     'analysis_line_id': line.id,
                     'serie_id': serie.id,
                 })
+                previous_line_serie = new_line_serie
             previous_serie = serie

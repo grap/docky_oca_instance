@@ -48,6 +48,10 @@ class OdooMigration(models.Model):
         string='Migration Lines', comodel_name='odoo.migration.line',
         inverse_name='migration_id')
 
+    coverage_percent = fields.Float(
+        digits=(6, 2), string='Coverage (%)',
+        readonly=True)
+
     def button_analyse_coverage(self):
         OdooModule = self.env['odoo.module']
         OodooModuleVersion = self.env['odoo.module.version']
@@ -134,7 +138,13 @@ class OdooMigration(models.Model):
                         'final_module_version_id': final_version_id,
                         'final_owner_type': final_owner_type,
                     })
-
+            ok_lines = migration.line_ids.filtered(
+                lambda x: x.state in [
+                    'ok_migration', 'ok_new_module', 'ok_removed_module',
+                    'ok_moved_module'])
+            
+            migration.coverage_percent =\
+                len(ok_lines) / len(migration.line_ids) * 100
 #                    module_state = 'to_migrate'
 #                    module_state_text = module_data[1]
 #                    odoo_module = OdooModule.create_if_not_exist(module_name)

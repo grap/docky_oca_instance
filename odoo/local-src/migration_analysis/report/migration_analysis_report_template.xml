@@ -47,7 +47,7 @@
                                     <td t-att-style="'background-color:' + line_serie.report_color + ';'">
                                         <span t-field="line_serie.state"/>
                                         <span style="color:gray;">
-                                            (<span t-field="line_serie.type"/>)
+                                            (<span t-field="line_serie.owner_type"/>)
                                         </span>
                                     </td>
                                 </t>

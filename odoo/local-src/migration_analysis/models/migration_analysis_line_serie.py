@@ -3,24 +3,21 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import api, fields, models
+from odoo.addons.github_connector_oca.models.github_organization\
+    import _OWNER_TYPE_SELECTION
+
+from odoo.addons.migration_analysis.models.odoo_migration_line\
+    import _STATE_SELECTION as _MIGRATION_STATE_SELECTION
 
 
 class MigrationAnalysisLineSerie(models.Model):
     _name = 'migration.analysis.line.serie'
 
-    _STATE_SELECTION = [
-        ('unknown', 'Unknown'),
+    _STATE_SELECTION = _MIGRATION_STATE_SELECTION + [
         ('initial', 'Initial'),
-        ('ok', 'OK'),
-        ('to_migrate', 'To Migrate'),
-        ('to_port', 'To Port'),
-        ('obsolete', 'Obsolete'),
-    ]
-
-    _TYPE_SELECTION = [
-        ('odoo', 'Odoo'),
-        ('OCA', 'OCA'),
-        ('custom', 'Custom'),
+        ('unknown', 'Unknown'),
+        ('ok_ported', 'OK (Ported Module)'),
+        ('todo_port', 'TODO (Port)'),
     ]
 
     analysis_line_id = fields.Many2one(
@@ -33,8 +30,8 @@ class MigrationAnalysisLineSerie(models.Model):
         string='State', selection=_STATE_SELECTION, default='unknown',
         required=True)
 
-    type = fields.Selection(
-        string='Type', selection=_TYPE_SELECTION, default='custom',
+    owner_type = fields.Selection(
+        string='Type', selection=_OWNER_TYPE_SELECTION, default='undefined',
         required=True)
 
     report_color = fields.Char(
@@ -42,11 +39,11 @@ class MigrationAnalysisLineSerie(models.Model):
 
     def _compute_report_color(self):
         for line_serie in self:
-            if line_serie.state in ['ok', 'initial']:
+            if line_serie.state == 'initial' or 'ok_' in line_serie.state:
                 line_serie.report_color = 'green'
-            elif line_serie.state in ['to_migrate', 'to_port']:
-                line_serie.report_color = 'yellow'
-            elif line_serie.state in ['obsolete']:
-                line_serie.report_color = 'gray'
-            else:
+            elif 'todo_' in line_serie.state:
                 line_serie.report_color = 'orange'
+            elif 'wip_' in line_serie.state:
+                line_serie.report_color = 'yellow'
+            else:
+                line_serie.report_color = 'gray'

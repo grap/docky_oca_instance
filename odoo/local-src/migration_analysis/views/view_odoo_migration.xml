@@ -23,6 +23,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
             <tree>
                 <field name="initial_serie_id"/>
                 <field name="final_serie_id"/>
+                <field name="coverage_percent"/>
             </tree>
         </field>
     </record>
@@ -40,6 +41,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                         <field name="initial_serie_id"/>
                         <field name="final_serie_id"/>
                         <field name="odoo_coverage_url"/>
+                        <field name="coverage_percent"/>
                     </group>
                     <notebook>
                         <page name="migration_lines" string="Lines">

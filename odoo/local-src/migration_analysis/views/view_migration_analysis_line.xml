@@ -17,7 +17,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                         <field name="line_serie_ids">
                             <tree>
                                 <field name="serie_id" />
-                                <field name="type" />
+                                <field name="owner_type" />
                                 <field name="state" />
                             </tree>
                         </field>
