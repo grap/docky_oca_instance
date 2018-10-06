@@ -7,5 +7,5 @@ interface-github:
     src: https://github.com/OCA/interface-github 11.0
 
 web:
-    modules: [web_tree_dynamic_colored_field]
+    modules: [web_tree_dynamic_colored_field,web_sheet_full_width]
     src: https://github.com/OCA/web 11.0

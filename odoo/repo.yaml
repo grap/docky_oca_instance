@@ -3,13 +3,13 @@
   merges: [origin 11.0]
   remotes: {origin: 'https://github.com/OCA/interface-github'}
   target: origin 11.0
-./external-src/server-tools:
+./external-src/web:
   default: {depth: 20}
   merges: [origin 11.0]
-  remotes: {origin: 'https://github.com/OCA/server-tools'}
+  remotes: {origin: 'https://github.com/OCA/web'}
   target: origin 11.0
 src:
   default: {depth: 20}
   merges: [origin 11.0]
-  remotes: {origin: 'https://github.com/OCA/ocb'}
+  remotes: {origin: 'https://github.com/OCA/OCB'}
   target: origin 11.0

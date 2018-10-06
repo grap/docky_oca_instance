@@ -47,7 +47,15 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                                 <field name="line_ids" nolabel="1">
                                     <tree>
                                         <field name="module_name"/>
-                                        <field name="state" options='{"bg_color": "green: state in [ok_migration, ok_new_module, ok_migration, ok_removed_module, ok_moved_module]; red: state == todo_migration"}' />
+                                        <field name="state" options="{'bg_color':'
+                                            MediumSeaGreen: state in[
+                                                &quot;ok_migration&quot;,
+                                                &quot;ok_new_module&quot;,
+                                                &quot;ok_removed_module&quot;,
+                                                &quot;ok_moved_module&quot;,];
+                                            Tomato: state == &quot;todo_migration&quot; ;
+                                            Orange: state == &quot;wip_migration&quot; ;
+                                            '}" />
                                         <field name="initial_owner_type" attrs="{'invisible': [('state', '=', 'ok_new_module')]}"/>
                                         <field name="initial_module_version_id"/>
                                         <field name="final_owner_type" attrs="{'invisible': [('state', '=', 'ok_removed_module')]}"/>
@@ -57,6 +65,8 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                             </group>
                         </page>
                     </notebook>
+
+<!--, ok_new_module, ok_migration, ok_removed_module, ok_moved_module]; red: state == todo_migration-->
 
                 </sheet>
             </form>
