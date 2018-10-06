@@ -13,6 +13,7 @@ class MigrationAnalysisLineSerie(models.Model):
         ('initial', 'Initial'),
         ('ok', 'OK'),
         ('to_migrate', 'To Migrate'),
+        ('to_port', 'To Port'),
         ('obsolete', 'Obsolete'),
     ]
 
@@ -35,3 +36,17 @@ class MigrationAnalysisLineSerie(models.Model):
     type = fields.Selection(
         string='Type', selection=_TYPE_SELECTION, default='custom',
         required=True)
+
+    report_color = fields.Char(
+        string='Color in the Report', compute='_compute_report_color')
+
+    def _compute_report_color(self):
+        for line_serie in self:
+            if line_serie.state in ['ok', 'initial']:
+                line_serie.report_color = 'green'
+            elif line_serie.state in ['to_migrate', 'to_port']:
+                line_serie.report_color = 'yellow'
+            elif line_serie.state in ['obsolete']:
+                line_serie.report_color = 'gray'
+            else:
+                line_serie.report_color = 'orange'

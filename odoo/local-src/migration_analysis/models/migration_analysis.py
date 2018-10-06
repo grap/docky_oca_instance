@@ -54,6 +54,7 @@ class MigrationAnalysis(models.Model):
 
     def _do_analysis(self):
         self.ensure_one()
+        OdooModuleVersion = self.env['odoo.module.version']
         AnalysisLineSerie = self.env['migration.analysis.line.serie']
         OdooModuleCoreVersion = self.env['odoo.module.core.version']
         previous_serie = False
@@ -69,6 +70,10 @@ class MigrationAnalysis(models.Model):
                 ])
                 if module_core_version:
                     type = 'odoo'
+                else:
+                    pass
+#                    oca_module_version = OdooModuleVersion.search([
+#                    ])
 
                 # Identify workload (state)
                 if not previous_serie:
