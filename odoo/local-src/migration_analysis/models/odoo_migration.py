@@ -4,7 +4,7 @@
 
 from urllib.request import Request, urlopen
 
-from odoo import api, fields, models
+from odoo import _, api, exceptions, fields, models
 
 
 class OdooMigration(models.Model):
@@ -71,7 +71,7 @@ class OdooMigration(models.Model):
                 if len(module_data) >= 2:
                     # Parse Data
                     module_name = module_data[0]
-                    # TODO, analyse if module has been renamed.
+                    # TODO, analyse if module has been renamed. (Is it possible ?)
                     new_module_name = module_name
                     initial_versions = OodooModuleVersion.search([
                         ('technical_name', '=', module_name),
@@ -100,14 +100,14 @@ class OdooMigration(models.Model):
                         initial_owner_type = initial_versions[0].owner_type
                     else:
                         initial_version_id = False
-                        initial_owner_type = 'undefined'
+                        initial_owner_type = '5_undefined'
 
                     if final_versions:
                         final_version_id = final_versions[0].id
                         final_owner_type = final_versions[0].owner_type
                     else:
                         final_version_id = False
-                        final_owner_type = 'undefined'
+                        final_owner_type = '5_undefined'
 
                     # Analyse state (1/2 : Simple Cases)
                     if not initial_versions:
@@ -118,7 +118,7 @@ class OdooMigration(models.Model):
                         # because we don't have any way to know it
                         migration_state = 'ok_removed_module'
                     else:
-                        if final_owner_type != 'editor':
+                        if final_owner_type != '1_editor':
                             migration_state = 'ok_moved_module'
 
                     # Analyse state (2/2 : Parsing document)
@@ -145,27 +145,6 @@ class OdooMigration(models.Model):
             
             migration.coverage_percent =\
                 len(ok_lines) / len(migration.line_ids) * 100
-#                    module_state = 'to_migrate'
-#                    module_state_text = module_data[1]
-#                    odoo_module = OdooModule.create_if_not_exist(module_name)
-#                    for k, v in self._mapping_analysis.items():
-#                        if k in module_state_text:
-#                            module_state = v
-###                    if not new_module:
-###                        previous_version =\
-###                            OdooModuleCoreVersion.create_if_not_exist(
-###                                odoo_module, migration.initial_serie_id)
-###                        previous_version.next_version_state = module_state
-###                    if not obsolete_version:
-###                        new_version =\
-###                            OdooModuleCoreVersion.create_if_not_exist(
-###                                odoo_module, migration.final_serie_id)
-###                    else:
-###                        # TODO FIXME, doesn't work
-###                        previous_version =\
-###                            OdooModuleCoreVersion.create_if_not_exist(
-###                                odoo_module, migration.initial_serie_id)
-###                        previous_version.write({'next_version_state': 'obsolete'})
 
     def _parse_openupgrade_file(self):
         self.ensure_one()
@@ -178,7 +157,4 @@ class OdooMigration(models.Model):
         for parse_value in self._LINE_SPLIT_PARSE_VALUES:
             if parse_value in table_data:
                 data_list = table_data.split(parse_value)
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-        print(data_list)
-        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
         return data_list

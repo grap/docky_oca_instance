@@ -14,6 +14,8 @@ class MigrationAnalysisLineSerie(models.Model):
     _name = 'migration.analysis.line.serie'
 
     _STATE_SELECTION = _MIGRATION_STATE_SELECTION + [
+        ('error_openupgrade', 'Error (OpenUpgrade)'),
+        ('error_duplicate', 'Error (Duplicates)'),
         ('initial', 'Initial'),
         ('unknown', 'Unknown'),
         ('ok_ported', 'OK (Ported Module)'),
@@ -35,15 +37,19 @@ class MigrationAnalysisLineSerie(models.Model):
         required=True)
 
     report_color = fields.Char(
-        string='Color in the Report', compute='_compute_report_color')
+        string='Color in the Report', compute='_compute_report_color',
+        store=True)
 
+    @api.depends('state')
     def _compute_report_color(self):
         for line_serie in self:
             if line_serie.state == 'initial' or 'ok_' in line_serie.state:
-                line_serie.report_color = 'green'
+                line_serie.report_color = 'MediumSeaGreen'
             elif 'todo_' in line_serie.state:
-                line_serie.report_color = 'orange'
+                line_serie.report_color = 'Orange'
             elif 'wip_' in line_serie.state:
-                line_serie.report_color = 'yellow'
+                line_serie.report_color = 'SlateBlue'
+            elif 'error_' in line_serie.state:
+                line_serie.report_color = 'Tomato'
             else:
-                line_serie.report_color = 'gray'
+                line_serie.report_color = 'Gray'

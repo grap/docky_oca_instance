@@ -14,6 +14,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                 <sheet>
                     <group>
                         <field name="name"/>
+                        <field name="main_owner_type"/>
                         <field name="line_serie_ids">
                             <tree>
                                 <field name="serie_id" />

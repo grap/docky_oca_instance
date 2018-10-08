@@ -8,6 +8,7 @@ from odoo import api, fields, models
 from odoo.addons.github_connector_oca.models.github_organization\
     import _OWNER_TYPE_SELECTION
 
+
 _STATE_SELECTION = [
     ('ok_migration',        'OK (Migration Done)'),
     ('ok_new_module',       'OK (New Module)'),
@@ -16,6 +17,7 @@ _STATE_SELECTION = [
     ('wip_migration',       'WIP (Migration)'),
     ('todo_migration',      'TODO (Migration)'),
 ]
+
 
 class OdooMigrationLine(models.Model):
     _name = 'odoo.migration.line'

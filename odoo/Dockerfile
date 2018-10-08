@@ -6,3 +6,5 @@ COPY ./etc/odoo.cfg.tmpl /opt/etc/odoo.cfg.tmpl
 RUN pip install -r /opt/odoo/requirements.txt
 RUN pip install -e /opt/odoo
 RUN pip install -e /opt/odoo/src
+
+RUN apt-get install cloc

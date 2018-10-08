@@ -57,53 +57,73 @@ class MigrationAnalysis(models.Model):
         OdooModuleVersion = self.env['odoo.module.version']
         MigrationLine = self.env['odoo.migration.line']
         AnalysisLineSerie = self.env['migration.analysis.line.serie']
-        previous_serie = False
-        for serie in self.serie_ids:
+
+        for line in self.line_ids:
+
             previous_line_serie = False
-            for line in self.line_ids:
+            for serie in self.serie_ids:
+                owner_type = '5_undefined'
                 state = 'unknown'
 
                 # Find the OpenUpgrade migration result (if any)
-                migration_line = MigrationLine.search([
-                    ('module_name', '=', line.name),
-                    ('initial_serie_id', '=', serie.id),
-                ])
+                if previous_line_serie:
+                    migration_line = MigrationLine.search([
+                        ('module_name', '=', line.name),
+                        ('initial_serie_id', '=',
+                        previous_line_serie.serie_id.id),
+                    ])
 
                 # Find Odoo Module Version (if found)
-                if previous_serie:
+                if previous_line_serie:
                     previous_module_version = OdooModuleVersion.search([
                         ('technical_name', '=', line.name),
-                        ('serie_id', '=', previous_serie.id),
+                        ('serie_id', '=', previous_line_serie.serie_id.id),
                     ])
                 current_module_version = OdooModuleVersion.search([
                     ('technical_name', '=', line.name),
                     ('serie_id', '=', serie.id),
                 ])
 
-                # Define owner type
-                if current_module_version:
+                # Identify owner type
+                if (previous_line_serie and len(previous_module_version) > 1)\
+                        or len(current_module_version) >1:
+                    # This case occures if you fetch branches of forked project
+                    state = 'error_duplicate'
+                elif current_module_version:
                     owner_type = current_module_version.owner_type
-                else:
-                    owner_type = 'undefined'
 
                 # Identify workload (state)
-                if not previous_serie:
+                if state == 'error_duplicate':
+                    pass
+                if not previous_line_serie:
                     # First Version
                     state = 'initial'
                 elif migration_line:
                     state = migration_line.state
                 elif previous_module_version:
-                    if current_module_version and previous_module_version.owner_type != 'editor':
-                        state = 'ok_ported'
-                    elif previous_line_serie.state == 'ok_removed_module':
-                        state = 'ok_removed_module'
+                    if current_module_version:
+                        if previous_module_version.owner_type != 'editor':
+                            # Module was editor, and has been moved to OCA
+                            # or a custom repository
+                            state = 'ok_ported'
+                        else:
+                            state = 'error_openupgrade'
                     else:
-                        state = 'todo_port'
+                        if previous_line_serie.state == 'ok_removed_module':
+                            state = 'ok_removed_module'
+                        else:
+                            state = 'todo_port'
                 else:
                     if current_module_version:
                         state = 'ok_ported'
                     else:
-                        state = 'unknown'
+                        if previous_line_serie.state == 'initial':
+                            # No module found at all
+                            state = 'unknown'
+                        else:
+                            # We guess that it is the same work, as for
+                            # the previous serie
+                            state = previous_line_serie.state
 
                 new_line_serie = AnalysisLineSerie.create({
                     'owner_type': owner_type,
@@ -112,4 +132,3 @@ class MigrationAnalysis(models.Model):
                     'serie_id': serie.id,
                 })
                 previous_line_serie = new_line_serie
-            previous_serie = serie

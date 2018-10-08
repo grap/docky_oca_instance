@@ -45,6 +45,7 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                             <group cols="4">
                                 <field name="line_ids" nolabel="1" editable="bottom">
                                     <tree>
+                                        <field name="main_owner_type"/>
                                         <field name="name"/>
                                         <field name="description"/>
                                     </tree>

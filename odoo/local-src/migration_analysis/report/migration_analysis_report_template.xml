@@ -3,6 +3,28 @@
     <template id="report_migration_analysis_document">
         <t t-call="web.external_layout">
             <t t-set="doc" t-value="doc.with_context({'lang':doc.user_id.partner_id.lang})" />
+
+            <style type="text/css">
+                td, th {
+                    border: 1px solid;
+                }
+                .main_th {
+                    text-align: center;
+                    background-color:DodgerBlue;
+                    font-size: 18px;
+                }
+                .detail_important {
+                    font-family: monospace;
+                    font-size: 10px;
+                }
+                .detail {
+                    font-family: monospace;
+                    font-size: 10px;
+                    color:gray;
+                }
+            </style>
+
+
             <div class="page">
                 <div class="oe_structure"/>
 
@@ -23,35 +45,59 @@
                         <strong>Final Serie :</strong>
                         <p t-field="doc.final_serie_id.name"/>
                     </div>
+                    <div class="col-xs-3">
+                        <strong>Modules Quantity :</strong>
+                        <p t-esc="len(doc.line_ids)"/>
+                    </div>
                 </div>
 
                 <table class="table table-condensed" style="width:100%">
                     <thead>
                         <tr>
-                            <th>Module Name</th>
+                            <th class="main_th">Module Name</th>
                             <t t-foreach="doc.serie_ids" t-as="serie">
-                                <th>
-                                    <span t-field="serie.name"/>
-                                </th>
+                                <th class="main_th" t-field="serie.name"/>
                             </t>
                         </tr>
                    </thead>
 
                    <tbody class="sale_tbody">
-                        <t t-foreach="doc.line_ids" t-as="line">
-                            <tr>
-                                <th>
-                                    <span t-field="line.name"/>
-                                </th>
-                                <t t-foreach="line.line_serie_ids" t-as="line_serie">
-                                    <td t-att-style="'background-color:' + line_serie.report_color + ';'">
-                                        <span t-field="line_serie.state"/>
-                                        <span style="color:gray;">
-                                            (<span t-field="line_serie.owner_type"/>)
-                                        </span>
-                                    </td>
+                        <t t-foreach="['1_editor', '2_oca', '3_extra', '4_custom', '5_undefined']" t-as="owner_type">
+                            <t t-if="len(doc.line_ids.filtered(lambda x: x.main_owner_type == owner_type)) != 0">
+                                <tr>
+                                    <th class="main_th" t-att-colspan="len(doc.serie_ids) + 1">
+                                        <t   t-if="owner_type == '1_editor'"   >Odoo SA</t>
+                                        <t t-elif="owner_type == '2_oca'"      >OCA</t>
+                                        <t t-elif="owner_type == '3_extra'"    >Extra</t>
+                                        <t t-elif="owner_type == '4_custom'"   >Custom</t>
+                                        <t t-else="owner_type == '5_undefined'">Not Found</t>
+                                        (<t t-esc="len(doc.line_ids.filtered(lambda x: x.main_owner_type == owner_type))" /> Modules)
+                                    </th>
+                                </tr>
+                                <t t-foreach="doc.line_ids.filtered(lambda x: x.main_owner_type == owner_type)" t-as="line">
+                                    <tr>
+                                        <th>
+                                            <!-- quiet ugly. Just to force to split the line, if the module name is very big-->
+                                            <span t-esc="line.name.replace('_', ' ')"/>
+                                        </th>
+                                        <t t-foreach="line.line_serie_ids" t-as="line_serie">
+                                            <td t-att-style="'background-color:' + line_serie.report_color + ';'">
+                                                <t t-if="line_serie.state == 'ok_removed_module'">
+                                                    <span  class="detail"
+                                                        t-field="line_serie.state" />
+                                                </t>
+                                                <t t-else="">
+                                                    <span class="detail_important" t-field="line_serie.state"/>
+                                                    <t t-if="line_serie.owner_type != owner_type">
+                                                        <br />
+                                                        <span class="detail" t-field="line_serie.owner_type" />
+                                                    </t>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
                                 </t>
-                            </tr>
+                            </t>
                         </t>
                     </tbody>
                 </table>
