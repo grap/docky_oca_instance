@@ -40,6 +40,18 @@ class MigrationAnalysisLineSerie(models.Model):
         string='Color in the Report', compute='_compute_report_color',
         store=True)
 
+    python_lines_qty = fields.Integer(
+        string='Python Lines Quantity', readonly=True)
+
+    xml_yml_lines_qty = fields.Integer(
+        string='XML/YML Lines Quantity', readonly=True)
+
+    js_lines_qty = fields.Integer(
+        string='Javascript Lines Quantity', readonly=True)
+
+    css_lines_qty = fields.Integer(
+        string='CSS Lines Quantity', readonly=True)
+
     @api.depends('state')
     def _compute_report_color(self):
         for line_serie in self:

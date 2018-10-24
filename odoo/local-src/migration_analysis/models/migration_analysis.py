@@ -125,10 +125,20 @@ class MigrationAnalysis(models.Model):
                             # the previous serie
                             state = previous_line_serie.state
 
-                new_line_serie = AnalysisLineSerie.create({
+                vals = {
                     'owner_type': owner_type,
                     'state': state,
                     'analysis_line_id': line.id,
                     'serie_id': serie.id,
-                })
+                }
+                if len(current_module_version) == 1:
+                    vals.update({
+                        'python_lines_qty':
+                        current_module_version.python_lines_qty,
+                        'xml_yml_lines_qty':
+                        current_module_version.xml_yml_lines_qty,
+                        'js_lines_qty': current_module_version.js_lines_qty,
+                        'css_lines_qty': current_module_version.css_lines_qty,
+                    })
+                new_line_serie = AnalysisLineSerie.create(vals)
                 previous_line_serie = new_line_serie

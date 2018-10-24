@@ -7,4 +7,4 @@ RUN pip install -r /opt/odoo/requirements.txt
 RUN pip install -e /opt/odoo
 RUN pip install -e /opt/odoo/src
 
-RUN apt-get install cloc
+RUN apt-get update && apt-get install cloc -y

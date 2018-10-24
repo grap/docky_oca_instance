@@ -102,6 +102,67 @@
                     </tbody>
                 </table>
 
+                <table class="table table-condensed" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th class="main_th">File type</th>
+                            <t t-foreach="doc.serie_ids" t-as="serie">
+                                <th class="main_th" t-field="serie.name"/>
+                            </t>
+                        </tr>
+                   </thead>
+
+                   <tbody class="sale_tbody">
+                        <t t-foreach="['1_editor', '2_oca', '3_extra', '4_custom', '5_undefined']" t-as="owner_type">
+                            <t t-if="len(doc.line_ids.filtered(lambda x: x.main_owner_type == owner_type)) != 0">
+                                <tr>
+                                    <th class="main_th" t-att-colspan="len(doc.serie_ids) + 1">
+                                        <t   t-if="owner_type == '1_editor'"   >Odoo SA</t>
+                                        <t t-elif="owner_type == '2_oca'"      >OCA</t>
+                                        <t t-elif="owner_type == '3_extra'"    >Extra</t>
+                                        <t t-elif="owner_type == '4_custom'"   >Custom</t>
+                                        <t t-else="owner_type == '5_undefined'">Not Found</t>
+                                        (<t t-esc="len(doc.line_ids.filtered(lambda x: x.main_owner_type == owner_type))" /> Modules)
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        Python
+                                    </th>
+                                    <t t-foreach="doc.serie_ids" t-as="serie">
+                                        <td t-esc="sum(doc.mapped('line_ids.line_serie_ids').filtered(lambda x: x.serie_id == serie and x.owner_type == owner_type).mapped('python_lines_qty'))"/>
+                                    </t>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        XML / YML
+                                    </th>
+                                    <t t-foreach="doc.serie_ids" t-as="serie">
+                                        <td t-esc="sum(doc.mapped('line_ids.line_serie_ids').filtered(lambda x: x.serie_id == serie and x.owner_type == owner_type).mapped('xml_yml_lines_qty'))"/>
+                                    </t>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        JavaScript
+                                    </th>
+                                    <t t-foreach="doc.serie_ids" t-as="serie">
+                                        <td t-esc="sum(doc.mapped('line_ids.line_serie_ids').filtered(lambda x: x.serie_id == serie and x.owner_type == owner_type).mapped('js_lines_qty'))"/>
+                                    </t>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        CSS
+                                    </th>
+                                    <t t-foreach="doc.serie_ids" t-as="serie">
+                                        <td t-esc="sum(doc.mapped('line_ids.line_serie_ids').filtered(lambda x: x.serie_id == serie and x.owner_type == owner_type).mapped('css_lines_qty'))"/>
+                                    </t>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+
+
                 <div class="oe_structure"/>
             </div>
         </t>
