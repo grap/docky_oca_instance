@@ -18,7 +18,6 @@ class MigrationAnalysisLineSerie(models.Model):
         ('error_duplicate', 'Error (Duplicates)'),
         ('initial', 'Initial'),
         ('unknown', 'Unknown'),
-        ('ok_ported', 'OK (Ported Module)'),
         ('todo_port', 'TODO (Port)'),
     ]
 

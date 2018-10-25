@@ -9,31 +9,31 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
     <record id="migration_70_80" model="odoo.migration">
         <field name="initial_serie_id" ref="github_connector.oca_serie_70" />
         <field name="final_serie_id" ref="github_connector.oca_serie_80" />
-        <field name="odoo_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/8.0/openerp/openupgrade/doc/source/modules70-80.rst</field>
+        <field name="openupgrade_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/8.0/openerp/openupgrade/doc/source/modules70-80.rst</field>
     </record>
 
     <record id="migration_80_90" model="odoo.migration">
         <field name="initial_serie_id" ref="github_connector.oca_serie_80" />
         <field name="final_serie_id" ref="github_connector.oca_serie_90" />
-        <field name="odoo_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/9.0/openerp/openupgrade/doc/source/modules80-90.rst</field>
+        <field name="openupgrade_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/9.0/openerp/openupgrade/doc/source/modules80-90.rst</field>
     </record>
 
     <record id="migration_90_100" model="odoo.migration">
         <field name="initial_serie_id" ref="github_connector.oca_serie_90" />
         <field name="final_serie_id" ref="github_connector.oca_serie_100" />
-        <field name="odoo_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/10.0/odoo/openupgrade/doc/source/modules90-100.rst</field>
+        <field name="openupgrade_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/10.0/odoo/openupgrade/doc/source/modules90-100.rst</field>
     </record>
 
     <record id="migration_100_110" model="odoo.migration">
         <field name="initial_serie_id" ref="github_connector.oca_serie_100" />
         <field name="final_serie_id" ref="github_connector.oca_serie_110" />
-        <field name="odoo_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/11.0/odoo/openupgrade/doc/source/modules100-110.rst</field>
+        <field name="openupgrade_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/11.0/odoo/openupgrade/doc/source/modules100-110.rst</field>
     </record>
 
     <record id="migration_110_120" model="odoo.migration">
         <field name="initial_serie_id" ref="github_connector.oca_serie_110" />
         <field name="final_serie_id" ref="github_connector.oca_serie_120" />
-        <field name="odoo_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/12.0/odoo/openupgrade/doc/source/modules110-120.rst</field>
+        <field name="openupgrade_coverage_url">https://raw.githubusercontent.com/OCA/OpenUpgrade/12.0/odoo/openupgrade/doc/source/modules110-120.rst</field>
     </record>
 
 </odoo>

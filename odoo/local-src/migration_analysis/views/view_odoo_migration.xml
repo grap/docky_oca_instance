@@ -40,7 +40,8 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                     <group>
                         <field name="initial_serie_id"/>
                         <field name="final_serie_id"/>
-                        <field name="odoo_coverage_url"/>
+                        <field name="openupgrade_coverage_url"/>
+                        <field name="openupgrade_module_url"/>
                         <field name="coverage_percent"/>
                     </group>
                     <notebook>
@@ -53,22 +54,33 @@ License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
                                             MediumSeaGreen: state in[
                                                 &quot;ok_migration&quot;,
                                                 &quot;ok_new_module&quot;,
-                                                &quot;ok_removed_module&quot;,
                                                 &quot;ok_moved_module&quot;,];
-                                            Tomato: state == &quot;todo_migration&quot; ;
-                                            Orange: state == &quot;wip_migration&quot; ;
+                                            Tomato: state == &quot;todo_port_module&quot; ;
+                                            Orange: state == &quot;todo_migration&quot; ;
+                                            Yellow: state == &quot;wip_migration&quot; ;
                                             '}" />
                                         <field name="initial_owner_type" attrs="{'invisible': [('state', '=', 'ok_new_module')]}"/>
                                         <field name="initial_module_version_id"/>
-                                        <field name="final_owner_type" attrs="{'invisible': [('state', '=', 'ok_removed_module')]}"/>
+                                        <field name="final_owner_type" attrs="{'invisible': [('final_module_version_id', '=', False)]}"/>
                                         <field name="final_module_version_id"/>
+                                        <field name="name_state"
+                                            attrs="{'invisible': [('name_state', '=', 'nothing')]}"
+                                            options="{'bg_color':'
+                                            DodgerBlue: name_state == &quot;renamed&quot; ;
+                                            Violet: name_state == &quot;merged&quot; ;
+                                            '}"/>
                                     </tree>
                                 </field>
                             </group>
                         </page>
+                        <page name="technical_data" string="Technical Data">
+                            <group>
+                                <field name="coverage_text" />
+                                <field name="renamed_module_text"/>
+                                <field name="merged_module_text"/>
+                            </group>
+                        </page>
                     </notebook>
-
-<!--, ok_new_module, ok_migration, ok_removed_module, ok_moved_module]; red: state == todo_migration-->
 
                 </sheet>
             </form>

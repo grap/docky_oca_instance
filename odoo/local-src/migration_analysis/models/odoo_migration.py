@@ -4,7 +4,7 @@
 
 from urllib.request import Request, urlopen
 
-from odoo import _, api, exceptions, fields, models
+from odoo import _, exceptions, fields, models
 
 
 class OdooMigration(models.Model):
@@ -12,19 +12,27 @@ class OdooMigration(models.Model):
     _order = 'initial_serie_id'
 
     _BEGIN_TABLE_PARSE_VALUES = [
-        "+===================================+===================================+\n",
-        "+========================================+==========================================+\n",
-        "+===================================+=================================================+\n",
-        "+============================================+=================================================+\n",
+        "+===================================+================================"
+        "===+\n",
+        "+========================================+==========================="
+        "===============+\n",
+        "+===================================+================================"
+        "=================+\n",
+        "+============================================+======================="
+        "==========================+\n",
     ]
     _LINE_SPLIT_PARSE_VALUES = [
-        "+-----------------------------------+-----------------------------------+\n",
-        "+----------------------------------------+------------------------------------------+\n",
-        "+-----------------------------------+-------------------------------------------------+\n",
-        "+--------------------------------------------+-------------------------------------------------+\n",
+        "+-----------------------------------+--------------------------------"
+        "---+\n",
+        "+----------------------------------------+---------------------------"
+        "---------------+\n",
+        "+-----------------------------------+--------------------------------"
+        "-----------------+\n",
+        "+--------------------------------------------+-----------------------"
+        "--------------------------+\n",
     ]
 
-    _mapping_analysis = {
+    _MAPPING_ANALYSIS = {
         'Done': 'ok_migration',
         'No change': 'ok_migration',
         'Nothing to do': 'ok_migration',
@@ -40,9 +48,19 @@ class OdooMigration(models.Model):
         string='Final Serie', comodel_name='github.serie', required=True,
         domain="[('type', '=', 'odoo')]")
 
-    odoo_coverage_url = fields.Char(
+    openupgrade_coverage_url = fields.Char(
+        oldname='odoo_coverage_url',
         string='URL of the Coverage file',
         help="Usually set in the OpenUpgrade Project")
+
+    openupgrade_module_url = fields.Char(
+        oldname='odoo_merged_module_url',
+        string='URL of the Modules file',
+        help="Usually set in the OpenUpgrade Project, in a apriori.py file")
+
+    coverage_text = fields.Text(readonly=True)
+    renamed_module_text = fields.Text(readonly=True)
+    merged_module_text = fields.Text(readonly=True)
 
     line_ids = fields.One2many(
         string='Migration Lines', comodel_name='odoo.migration.line',
@@ -52,109 +70,212 @@ class OdooMigration(models.Model):
         digits=(6, 2), string='Coverage (%)',
         readonly=True)
 
+    _TEST_MODULE = [
+        'base',                 # ok_migration
+        'point_of_sale',        # todo_migration
+        'account',              # ok_migration
+        'account_chart',        # ok_migration. KO Should be merged
+        'edi',
+        'knowledge',
+        'disable_openerp_online',
+    ]
+
     def button_analyse_coverage(self):
-        OdooModule = self.env['odoo.module']
-        OodooModuleVersion = self.env['odoo.module.version']
+        self.ensure_one()
         OdooMigrationLine = self.env['odoo.migration.line']
-        for migration in self:
-            migration.line_ids.unlink()
-            data_list = self._parse_openupgrade_file()
-            for item in data_list:
-                migration_state = 'todo_migration'
-                if '|new|' in item:
-                    item = item.replace('|new|', '')
-                if '|del|' in item:
-                    item = item.replace('|del|', '')
-                module_data = item.replace("\n", "").split("|")
-                module_data = [
-                    x.strip() for x in module_data if x not in ['', ', ']]
-                if len(module_data) >= 2:
-                    # Parse Data
-                    module_name = module_data[0]
-                    # TODO, analyse if module has been renamed. (Is it possible ?)
-                    new_module_name = module_name
-                    initial_versions = OodooModuleVersion.search([
-                        ('technical_name', '=', module_name),
-                        ('serie_id', '=', migration.initial_serie_id.id),
-                    ])
+        self.line_ids.unlink()
+        self._parse_openupgrade_coverage_file()
+        self._parse_openupgrade_module_file()
 
-                    # Try to get initial and final module versions
-                    if len(initial_versions) > 1:
-                        exceptions.Warning(_(
-                            "Many Module Version found for the module %s"
-                            ", version %s" % (
-                                module_name, migration.initial_serie_id.name)))
-                    final_versions = OodooModuleVersion.search([
-                        ('technical_name', '=', new_module_name),
-                        ('serie_id', '=', migration.final_serie_id.id),
-                    ])
-                    if len(final_versions) > 1:
-                        exceptions.Warning(_(
-                            "Many Module Version found for the module %s"
-                            ", version %s" % (
-                                new_module_name,
-                                migration.initial_serie_id.name)))
+        coverage_modules = eval(self.coverage_text)
+        renamed_modules = eval(self.renamed_module_text)
+        merged_modules = eval(self.merged_module_text)
 
-                    if initial_versions:
-                        initial_version_id = initial_versions[0].id
-                        initial_owner_type = initial_versions[0].owner_type
-                    else:
-                        initial_version_id = False
-                        initial_owner_type = '5_undefined'
+        # Analyse
+        for module_name, coverage_state in coverage_modules.items():
+            migration_state = 'todo_migration'
+            if module_name not in self._TEST_MODULE:
+                continue
+            new_module_name, name_state, initial_version, final_version =\
+                self._get_versions(
+                    module_name, renamed_modules, merged_modules)
 
-                    if final_versions:
-                        final_version_id = final_versions[0].id
-                        final_owner_type = final_versions[0].owner_type
-                    else:
-                        final_version_id = False
-                        final_owner_type = '5_undefined'
+            if initial_version:
+                initial_version_id = initial_version.id
+                initial_owner_type = initial_version.owner_type
+            else:
+                initial_version_id = False
+                initial_owner_type = '5_undefined'
 
-                    # Analyse state (1/2 : Simple Cases)
-                    if not initial_versions:
-                        # New module --> Always OK
-                        migration_state = 'ok_new_module'
-                    elif not final_versions:
-                        # Removed module --> We assume it's always OK,
-                        # because we don't have any way to know it
-                        migration_state = 'ok_removed_module'
-                    else:
-                        if final_owner_type != '1_editor':
-                            migration_state = 'ok_moved_module'
+            if final_version:
+                final_version_id = final_version.id
+                final_owner_type = final_version.owner_type
+            else:
+                final_version_id = False
+                final_owner_type = '5_undefined'
 
-                    # Analyse state (2/2 : Parsing document)
-                    if migration_state == 'todo_migration':
-                        migration_state_text = module_data[1]
-                        for k, v in self._mapping_analysis.items():
-                            if k in migration_state_text:
-                                migration_state = v
+            # Analyse state (1/2 : Simple Cases)
+            if not initial_version:
+                # New module --> Always OK
+                migration_state = 'ok_new_module'
+            elif not final_version:
+                # todo_port
+                migration_state = 'todo_port_module'
+            else:
+                if final_owner_type != '1_editor':
+                    migration_state = 'ok_moved_module'
 
-                    # Creation migration lines
-                    OdooMigrationLine.create({
-                        'migration_id': migration.id,
-                        'state': migration_state,
-                        'module_name': module_name,
-                        'initial_module_version_id': initial_version_id,
-                        'initial_owner_type': initial_owner_type,
-                        'final_module_version_id': final_version_id,
-                        'final_owner_type': final_owner_type,
-                    })
-            ok_lines = migration.line_ids.filtered(
-                lambda x: x.state in [
-                    'ok_migration', 'ok_new_module', 'ok_removed_module',
-                    'ok_moved_module'])
-            
-            migration.coverage_percent =\
-                len(ok_lines) / len(migration.line_ids) * 100
+            # Analyse state (2/2 : Parsing document)
+            if migration_state == 'todo_migration':
+                migration_state = coverage_state
 
-    def _parse_openupgrade_file(self):
+            # Creation migration lines
+            OdooMigrationLine.create({
+                'migration_id': self.id,
+                'state': migration_state,
+                'name_state': name_state,
+                'module_name': module_name,
+                'initial_module_version_id': initial_version_id,
+                'initial_owner_type': initial_owner_type,
+                'final_module_version_id': final_version_id,
+                'final_owner_type': final_owner_type,
+            })
+
+        # Compute coverage percentage
+        ok_lines = self.line_ids.filtered(
+            lambda x: x.state in [
+                'ok_migration', 'ok_new_module', 'ok_removed_module',
+                'ok_moved_module'])
+
+        self.coverage_percent =\
+            len(ok_lines) / len(self.line_ids) * 100
+
+        for module_name, coverage_state in renamed_modules.items():
+            if module_name not in self._TEST_MODULE:
+                continue
+            if module_name in coverage_modules:
+                continue
+            new_module_name, name_state, initial_version, final_version =\
+                self._get_versions(
+                    module_name, renamed_modules, merged_modules)
+
+            # Creation migration lines
+            OdooMigrationLine.create({
+                'migration_id': self.id,
+                'state': migration_state,
+                'module_name': module_name,
+                'initial_module_version_id': initial_version_id,
+                'initial_owner_type': initial_owner_type,
+                'final_module_version_id': final_version_id,
+                'final_owner_type': final_owner_type,
+            })
+
+    def _get_versions(self, module_name, renamed_modules, merged_modules):
+        OodooModuleVersion = self.env['odoo.module.version']
+
+        if module_name in renamed_modules:
+            name_state = 'renamed'
+            new_module_name = renamed_modules[module_name]
+        elif module_name in merged_modules:
+            name_state = 'merged'
+            new_module_name = merged_modules[module_name]
+        else:
+            name_state = 'nothing'
+            new_module_name = module_name
+
+        # Try to get initial and final module versions
+        initial_versions = OodooModuleVersion.search([
+            ('technical_name', '=', module_name),
+            ('serie_id', '=', self.initial_serie_id.id),
+        ])
+        if len(initial_versions) > 1:
+            exceptions.Warning(_(
+                "Many Module Version found for the module %s"
+                ", version %s" % (
+                    module_name, self.initial_serie_id.name)))
+
+        final_versions = OodooModuleVersion.search([
+            ('technical_name', '=', new_module_name),
+            ('serie_id', '=', self.final_serie_id.id),
+        ])
+        if len(final_versions) > 1:
+            exceptions.Warning(_(
+                "Many Module Version found for the module %s"
+                ", version %s" % (
+                    new_module_name, self.initial_serie_id.name)))
+
+        return new_module_name, name_state,\
+            initial_versions and initial_versions[0],\
+            final_versions and final_versions[0],
+
+    def _parse_openupgrade_coverage_file(self):
+        """
+        Parse the Openupgrade coverage file, and return a dict of key,value
+        {'module_name_1': 'state_1', ...}
+        """
         self.ensure_one()
         table_data = ""
-        data = urlopen(Request(self.odoo_coverage_url)).read().decode('utf-8')
+        data = urlopen(Request(
+            self.openupgrade_coverage_url)).read().decode('utf-8')
         for parse_value in self._BEGIN_TABLE_PARSE_VALUES:
             if parse_value in data:
                 table_data = data.split(parse_value)[1]
-        data_list = []
+        data_list_tmp = []
+        res = {}
         for parse_value in self._LINE_SPLIT_PARSE_VALUES:
             if parse_value in table_data:
-                data_list = table_data.split(parse_value)
-        return data_list
+                data_list_tmp = table_data.split(parse_value)
+        for item in data_list_tmp:
+            if '|new|' in item:
+                item = item.replace('|new|', '')
+            if '|del|' in item:
+                item = item.replace('|del|', '')
+            module_data = item.replace("\n", "").split("|")
+            module_data = [
+                x.strip() for x in module_data if x not in ['', ', ']]
+            if len(module_data) >= 2:
+                module_name = module_data[0]
+                coverage_state_text = module_data[1]
+                coverage_state = 'todo_migration'
+
+                for k, v in self._MAPPING_ANALYSIS.items():
+                    if k in coverage_state_text:
+                        coverage_state = v
+                res[module_name] = coverage_state
+
+        self.coverage_text = res
+
+    def _parse_openupgrade_module_file(self):
+        """
+        Parse the Openupgrade merged module file,
+        and return a dict of key,value
+        {'module_name_1': 'new_module_name_1', ...}
+        """
+        res = {}
+        self.ensure_one()
+        data = urlopen(Request(
+            self.openupgrade_module_url)).read().decode('utf-8')
+
+        # Get Renamed modules data
+        table_data = data.split("renamed_modules = {\n")[1]
+        table_data = table_data.split("\n}")[0]
+        self.renamed_module_text = eval("{" + table_data + "}")
+
+        # Get Merged modules data
+        table_data = data.split("merged_modules = [\n")[1]
+        table_data = table_data.split("\n]")[0]
+        # for line in table_data.split("('"):
+        #     if "#" in line:
+        #         line = line.split("#")[0]
+        #     line = line.replace("\n", "")
+        #     while "  " in line:
+        #         line = line.replace("  ", " ")
+        #     line = line.strip().replace("'),", "").replace("', '", " ")
+        #     line_data = line.split(" ")
+        #     if len(line_data) == 2:
+        #         res[line_data[0]] = line_data[1]
+        my_list = eval("[" + table_data + "]")
+        res = {}
+        for item in my_list:
+            res[item[0]] = item[1]
+        self.merged_module_text = res

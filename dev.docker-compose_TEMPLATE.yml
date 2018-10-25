@@ -20,7 +20,7 @@ services:
       - DB_NAME=db
       - RUNNING_ENV=dev
       - MARABUNTA_MODE=demo
-      - VIRTUAL_HOST=docky-11-oca-instance.dy
+      - VIRTUAL_HOST=instance_oca_11_docky.dy
       - VIRTUAL_PORT=8069
       - ADDONS_PATH=src/addons,src/odoo/addons,links,local-src
       - GITHUB_LOGIN=XXXX
@@ -30,8 +30,10 @@ services:
     networks:
       default:
         aliases:
-          - docky-11-oca-instance.dy
+          - instance_oca_11_docky.dy
     volumes:
       - ./odoo:/opt/odoo
       - ../oca_code_source:/oca_code_source
+      - ./data:/data/
+
 version: '3'

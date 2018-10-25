@@ -9,7 +9,7 @@ class MigrationAnalysis(models.Model):
     _name = 'migration.analysis'
     _order = 'name'
 
-    # Default Section
+    # Default Section
     def _default_user_id(self):
         return self.env.user.company_id
 
@@ -39,7 +39,7 @@ class MigrationAnalysis(models.Model):
             series = GithubSerie.search([
                 ('sequence', '>=', analysis.initial_serie_id.sequence),
                 ('sequence', '<=', analysis.final_serie_id.sequence),
-                ])
+            ])
             analysis.serie_ids = series.ids
 
     # View Section
@@ -70,7 +70,7 @@ class MigrationAnalysis(models.Model):
                     migration_line = MigrationLine.search([
                         ('module_name', '=', line.name),
                         ('initial_serie_id', '=',
-                        previous_line_serie.serie_id.id),
+                            previous_line_serie.serie_id.id),
                     ])
 
                 # Find Odoo Module Version (if found)
@@ -86,13 +86,13 @@ class MigrationAnalysis(models.Model):
 
                 # Identify owner type
                 if (previous_line_serie and len(previous_module_version) > 1)\
-                        or len(current_module_version) >1:
+                        or len(current_module_version) > 1:
                     # This case occures if you fetch branches of forked project
                     state = 'error_duplicate'
                 elif current_module_version:
                     owner_type = current_module_version.owner_type
 
-                # Identify workload (state)
+                # Identify workload (state)
                 if state == 'error_duplicate':
                     pass
                 if not previous_line_serie:
@@ -105,7 +105,7 @@ class MigrationAnalysis(models.Model):
                         if previous_module_version.owner_type != 'editor':
                             # Module was editor, and has been moved to OCA
                             # or a custom repository
-                            state = 'ok_ported'
+                            state = 'ok_ported_module'
                         else:
                             state = 'error_openupgrade'
                     else:
@@ -115,7 +115,7 @@ class MigrationAnalysis(models.Model):
                             state = 'todo_port'
                 else:
                     if current_module_version:
-                        state = 'ok_ported'
+                        state = 'ok_ported_module'
                     else:
                         if previous_line_serie.state == 'initial':
                             # No module found at all
