@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2018-Today: Odoo Community Association (OCA)
+@author: Sylvain LE GAL (https://twitter.com/legalsylvain)
+License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+-->
+<odoo>
+
+
+    <record id="view_odoo_migration_line_search" model="ir.ui.view">
+        <field name="model">odoo.migration.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="migration_id"/>
+                <field name="state"/>
+                <field name="name_state"/>
+                <field name="initial_owner_type"/>
+                <field name="final_owner_type"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_odoo_migration_line_tree" model="ir.ui.view">
+        <field name="model">odoo.migration.line</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="module_name"/>
+                <field name="initial_owner_type"/>
+                <field name="initial_module_version_id"/>
+
+                <field name="new_module_name"/>
+                <field name="final_owner_type"/>
+                 <!-- attrs="{'invisible': [('final_module_version_id', '=', False)]}" -->
+                <field name="final_module_version_id"/>
+
+                <field name="state" options="{'bg_color':'
+                    MediumSeaGreen: state in[
+                        &quot;ok_migration&quot;,
+                        &quot;ok_new_module&quot;,
+                        &quot;ok_ported_module&quot;,
+                        &quot;ok_moved_module&quot;,];
+                    Tomato: state == &quot;todo_port_module&quot; ;
+                    Orange: state == &quot;todo_migration&quot; ;
+                    Yellow: state == &quot;wip_migration&quot; ;
+                    '}" />
+
+                <field name="name_state"
+                    options="{'bg_color':'
+                    DodgerBlue: name_state == &quot;renamed&quot; ;
+                    Violet: name_state == &quot;merged&quot; ;
+                    '}"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_odoo_migration_line_form" model="ir.ui.view">
+        <field name="model">odoo.migration.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <header />
+                <sheet>
+                    <div class="oe_button_box" name="button_box" />
+                    <group>
+                        <field name="migration_id"/>
+                    <field name="state" widget="statusbar"/>
+                        <field name="name_state" widget="statusbar"/>
+                    </group>
+                    <group>
+                        <group string="Initial Data">
+                            <field name="module_name"/>
+                            <field name="initial_serie_id"/>
+                            <field name="initial_module_version_id"/>
+                            <field name="initial_owner_type"/>
+
+
+                        </group>
+                        <group string="Final Data">
+                            <field name="new_module_name"/>
+                            <field name="final_serie_id"/>
+                            <field name="final_module_version_id"/>
+                            <field name="final_owner_type"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_odoo_migration_line" model="ir.actions.act_window">
+        <field name="name">Odoo Migration Lines</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">odoo.migration.line</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

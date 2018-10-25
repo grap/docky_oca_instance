@@ -4,7 +4,7 @@
 
 from urllib.request import Request, urlopen
 
-from odoo import _, exceptions, fields, models
+from odoo import _, api, exceptions, fields, models
 
 
 class OdooMigration(models.Model):
@@ -40,6 +40,8 @@ class OdooMigration(models.Model):
         'Moved to OCA': 'ok_migration',
     }
 
+    name = fields.Char(compute='_compute_name', store=True)
+
     initial_serie_id = fields.Many2one(
         string='Initial Serie', comodel_name='github.serie', required=True,
         domain="[('type', '=', 'odoo')]")
@@ -66,19 +68,35 @@ class OdooMigration(models.Model):
         string='Migration Lines', comodel_name='odoo.migration.line',
         inverse_name='migration_id')
 
+    line_qty = fields.Integer(
+        string="Line Quantity", compute='_compute_line_qty')
+
     coverage_percent = fields.Float(
         digits=(6, 2), string='Coverage (%)',
         readonly=True)
 
-    _TEST_MODULE = [
-        'base',                 # ok_migration
-        'point_of_sale',        # todo_migration
-        'account',              # ok_migration
-        'account_chart',        # ok_migration. KO Should be merged
-        'edi',
-        'knowledge',
-        'disable_openerp_online',
-    ]
+    # _TEST_MODULE = [
+    #     'base',                 # ok_migration
+    #     'point_of_sale',        # todo_migration
+    #     'account',              # ok_migration
+    #     'account_chart',        # ok_migration. KO Should be merged
+    #     'edi',
+    #     'knowledge',
+    #     'disable_openerp_online',
+    # ]
+    # _TEST_MODULE = []
+
+    @api.depends('line_ids')
+    def _compute_line_qty(self):
+        for migration in self:
+            migration.line_qty = len(migration.line_ids)
+
+    @api.depends('initial_serie_id', 'final_serie_id')
+    def _compute_name(self):
+        for migration in self:
+            migration.name = _("Migration from %s to %s") % (
+                migration.initial_serie_id.name,
+                migration.final_serie_id.name)
 
     def button_analyse_coverage(self):
         self.ensure_one()
@@ -94,8 +112,8 @@ class OdooMigration(models.Model):
         # Analyse
         for module_name, coverage_state in coverage_modules.items():
             migration_state = 'todo_migration'
-            if module_name not in self._TEST_MODULE:
-                continue
+            # if module_name not in self._TEST_MODULE:
+            #     continue
             new_module_name, name_state, initial_version, final_version =\
                 self._get_versions(
                     module_name, renamed_modules, merged_modules)
@@ -135,6 +153,7 @@ class OdooMigration(models.Model):
                 'state': migration_state,
                 'name_state': name_state,
                 'module_name': module_name,
+                'new_module_name': new_module_name,
                 'initial_module_version_id': initial_version_id,
                 'initial_owner_type': initial_owner_type,
                 'final_module_version_id': final_version_id,
@@ -147,28 +166,62 @@ class OdooMigration(models.Model):
                 'ok_migration', 'ok_new_module', 'ok_removed_module',
                 'ok_moved_module'])
 
-        self.coverage_percent =\
-            len(ok_lines) / len(self.line_ids) * 100
+        self.coverage_percent = self.line_ids and (
+            len(ok_lines) / len(self.line_ids) * 100) or 0
 
+        # Handle renamed modules that are not in Odoo Core
         for module_name, coverage_state in renamed_modules.items():
-            if module_name not in self._TEST_MODULE:
-                continue
             if module_name in coverage_modules:
                 continue
             new_module_name, name_state, initial_version, final_version =\
                 self._get_versions(
                     module_name, renamed_modules, merged_modules)
 
+            if final_version:
+                migration_state = 'ok_ported_module'
+
             # Creation migration lines
             OdooMigrationLine.create({
                 'migration_id': self.id,
-                'state': migration_state,
+                'state':
+                final_version and 'ok_ported_module' or 'todo_port_module',
+                'name_state': 'renamed',
                 'module_name': module_name,
-                'initial_module_version_id': initial_version_id,
-                'initial_owner_type': initial_owner_type,
-                'final_module_version_id': final_version_id,
-                'final_owner_type': final_owner_type,
+                'new_module_name': new_module_name,
+                'initial_module_version_id': initial_version.id,
+                'initial_owner_type': initial_version.owner_type,
+                'final_module_version_id': final_version and final_version.id,
+                'final_owner_type':
+                final_version and final_version.owner_type or '5_undefined',
             })
+
+        # Handle merged modules that are not in Odoo Core
+        for module_name, coverage_state in merged_modules.items():
+            if module_name in coverage_modules:
+                continue
+            new_module_name, name_state, initial_version, final_version =\
+                self._get_versions(
+                    module_name, renamed_modules, merged_modules)
+
+            if final_version:
+                migration_state = 'ok_ported_module'
+
+            # Creation migration lines
+            OdooMigrationLine.create({
+                'migration_id': self.id,
+                'state':
+                final_version and 'ok_ported_module' or 'todo_port_module',
+                'name_state': 'merged',
+                'module_name': module_name,
+                'new_module_name': new_module_name,
+                'initial_module_version_id': initial_version.id,
+                'initial_owner_type': initial_version.owner_type,
+                'final_module_version_id': final_version and final_version.id,
+                'final_owner_type':
+                final_version and final_version.owner_type or '5_undefined',
+            })
+
+        # Handle merged modules that are not in the Odoo Core
 
     def _get_versions(self, module_name, renamed_modules, merged_modules):
         OodooModuleVersion = self.env['odoo.module.version']
@@ -257,23 +310,13 @@ class OdooMigration(models.Model):
             self.openupgrade_module_url)).read().decode('utf-8')
 
         # Get Renamed modules data
-        table_data = data.split("renamed_modules = {\n")[1]
+        table_data = data.split("_oca_odoo_renamed_modules = {\n")[1]
         table_data = table_data.split("\n}")[0]
         self.renamed_module_text = eval("{" + table_data + "}")
 
         # Get Merged modules data
-        table_data = data.split("merged_modules = [\n")[1]
+        table_data = data.split("_oca_odoo_merged_modules = [\n")[1]
         table_data = table_data.split("\n]")[0]
-        # for line in table_data.split("('"):
-        #     if "#" in line:
-        #         line = line.split("#")[0]
-        #     line = line.replace("\n", "")
-        #     while "  " in line:
-        #         line = line.replace("  ", " ")
-        #     line = line.strip().replace("'),", "").replace("', '", " ")
-        #     line_data = line.split(" ")
-        #     if len(line_data) == 2:
-        #         res[line_data[0]] = line_data[1]
         my_list = eval("[" + table_data + "]")
         res = {}
         for item in my_list:

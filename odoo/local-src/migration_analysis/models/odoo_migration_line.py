@@ -41,8 +41,9 @@ class OdooMigrationLine(models.Model):
         string='Name State', selection=_NAME_STATE_SELECTION,
         default='nothing', required=True)
 
-    module_name = fields.Char(
-        string='Module Name', required=True)
+    module_name = fields.Char(string='Module Name')
+
+    new_module_name = fields.Char(string='New Module Name')
 
     initial_owner_type = fields.Selection(
         selection=_OWNER_TYPE_SELECTION, string='Initial Owner Type')
