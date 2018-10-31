@@ -19,6 +19,7 @@ class MigrationAnalysisLineSerie(models.Model):
         ('initial', 'Initial'),
         ('unknown', 'Unknown'),
         ('todo_port', 'TODO (Port)'),
+        ('nothing_to_do', 'Nothing to Do')
     ]
 
     analysis_line_id = fields.Many2one(
@@ -39,6 +40,8 @@ class MigrationAnalysisLineSerie(models.Model):
         string='Color in the Report', compute='_compute_report_color',
         store=True)
 
+    description = fields.Char()
+
     python_lines_qty = fields.Integer(
         string='Python Lines Quantity', readonly=True)
 
@@ -54,13 +57,15 @@ class MigrationAnalysisLineSerie(models.Model):
     @api.depends('state')
     def _compute_report_color(self):
         for line_serie in self:
-            if line_serie.state == 'initial' or 'ok_' in line_serie.state:
+            if line_serie.state in ['ok_merged_module', 'ok_renamed_module']:
+                line_serie.report_color = 'Yellow'
+            elif line_serie.state == 'initial' or 'ok_' in line_serie.state:
                 line_serie.report_color = 'MediumSeaGreen'
             elif 'todo_' in line_serie.state:
-                line_serie.report_color = 'Orange'
-            elif 'wip_' in line_serie.state:
-                line_serie.report_color = 'SlateBlue'
-            elif 'error_' in line_serie.state:
                 line_serie.report_color = 'Tomato'
+            elif 'wip_' in line_serie.state:
+                line_serie.report_color = 'Orange'
+            elif 'error_' in line_serie.state:
+                line_serie.report_color = 'DarkRed'
             else:
                 line_serie.report_color = 'Gray'

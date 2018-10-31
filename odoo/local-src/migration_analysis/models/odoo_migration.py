@@ -106,8 +106,10 @@ class OdooMigration(models.Model):
         self._parse_openupgrade_module_file()
 
         coverage_modules = eval(self.coverage_text)
-        renamed_modules = eval(self.renamed_module_text)
-        merged_modules = eval(self.merged_module_text)
+        renamed_modules = self.renamed_module_text\
+            and eval(self.renamed_module_text) or {}
+        merged_modules = self.merged_module_text\
+            and eval(self.merged_module_text) or {}
 
         # Analyse
         for module_name, coverage_state in coverage_modules.items():
@@ -266,6 +268,8 @@ class OdooMigration(models.Model):
         Parse the Openupgrade coverage file, and return a dict of key,value
         {'module_name_1': 'state_1', ...}
         """
+        if not self.openupgrade_coverage_url:
+            return
         self.ensure_one()
         table_data = ""
         data = urlopen(Request(
@@ -304,6 +308,8 @@ class OdooMigration(models.Model):
         and return a dict of key,value
         {'module_name_1': 'new_module_name_1', ...}
         """
+        if not self.openupgrade_module_url:
+            return
         res = {}
         self.ensure_one()
         data = urlopen(Request(

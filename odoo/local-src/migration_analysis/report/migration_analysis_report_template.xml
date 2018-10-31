@@ -88,9 +88,13 @@
                                                 </t>
                                                 <t t-else="">
                                                     <span class="detail_important" t-field="line_serie.state"/>
-                                                    <t t-if="line_serie.owner_type != owner_type">
+                                                    <t t-if="line_serie.owner_type != owner_type and line_serie.state not in ['ok_renamed_module', 'ok_merged_module']">
                                                         <br />
                                                         <span class="detail" t-field="line_serie.owner_type" />
+                                                    </t>
+                                                    <t t-if="line_serie.description">
+                                                        <br />
+                                                        <span class="detail" t-field="line_serie.description" />
                                                     </t>
                                                 </t>
                                             </td>

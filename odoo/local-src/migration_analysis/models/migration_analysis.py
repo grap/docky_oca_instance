@@ -62,6 +62,7 @@ class MigrationAnalysis(models.Model):
 
             previous_line_serie = False
             for serie in self.serie_ids:
+                description = ""
                 owner_type = '5_undefined'
                 state = 'unknown'
 
@@ -95,11 +96,22 @@ class MigrationAnalysis(models.Model):
                 # Identify workload (state)
                 if state == 'error_duplicate':
                     pass
+
                 if not previous_line_serie:
                     # First Version
                     state = 'initial'
+
                 elif migration_line:
-                    state = migration_line.state
+                    if migration_line.name_state == 'merged':
+                        state = 'ok_merged_module'
+                        description = "(%s)" % (migration_line.new_module_name)
+                    elif migration_line.name_state == 'renamed':
+                        state = 'ok_renamed_module'
+                        description = "(%s)" % (migration_line.new_module_name)
+
+                    else:
+                        state = migration_line.state
+
                 elif previous_module_version:
                     if current_module_version:
                         if previous_module_version.owner_type != 'editor':
@@ -109,8 +121,9 @@ class MigrationAnalysis(models.Model):
                         else:
                             state = 'error_openupgrade'
                     else:
-                        if previous_line_serie.state == 'ok_removed_module':
-                            state = 'ok_removed_module'
+                        if previous_line_serie.state in [
+                                'ok_removed_module', 'ok_renamed_module']:
+                            state = 'nothing_to_do'
                         else:
                             state = 'todo_port'
                 else:
@@ -121,11 +134,16 @@ class MigrationAnalysis(models.Model):
                             # No module found at all
                             state = 'unknown'
                         else:
-                            # We guess that it is the same work, as for
-                            # the previous serie
-                            state = previous_line_serie.state
+                            if previous_line_serie.state in [
+                                    'ok_removed_module', 'ok_renamed_module']:
+                                state = 'nothing_to_do'
+                            else:
+                                # Otherwise, We guess that it is the same
+                                # work, as for the previous serie
+                                state = previous_line_serie.state
 
                 vals = {
+                    'description': description,
                     'owner_type': owner_type,
                     'state': state,
                     'analysis_line_id': line.id,
